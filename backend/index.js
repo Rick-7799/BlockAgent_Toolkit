@@ -13,17 +13,17 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// logging
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 app.use(morgan('combined', { stream: accessLogStream }))
 
-// rate limiter (50 req / 15 min per IP)
+
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 50 })
 app.use(limiter)
 
-// audit helper
+
 const AUDIT_FILE = path.join(__dirname, 'audit.log')
 function audit(event, data) {
   const line = JSON.stringify({ ts: new Date().toISOString(), event, ...data }) + '\n'
@@ -31,9 +31,9 @@ function audit(event, data) {
 }
 
 const CHAIN_CONFIG = {
-  celo:    { rpc: process.env.CELO_RPC,    chainId: 44787 }, // Alfajores
-  aurora:  { rpc: process.env.AURORA_RPC,  chainId: 1313161555 }, // Aurora testnet
-  harmony: { rpc: process.env.HARMONY_RPC, chainId: 1666700000 }, // Harmony testnet shard0
+  celo:    { rpc: process.env.CELO_RPC,    chainId: 44787 }, 
+  aurora:  { rpc: process.env.AURORA_RPC,  chainId: 1313161555 }, 
+  harmony: { rpc: process.env.HARMONY_RPC, chainId: 1666700000 }, 
 }
 
 export function getWeb3(forChain) {
@@ -77,7 +77,7 @@ app.get('/balance', async (req, res) => {
 
 app.post('/tx/send', async (req, res) => {
   try {
-    const { to, amount, chain } = req.body // amount in ETH/CELO/ONE
+    const { to, amount, chain } = req.body 
     const { web3 } = getWeb3(chain)
     const signer = getSigner(web3)
     const tx = {
@@ -129,11 +129,11 @@ app.post('/contract/call', async (req, res) => {
   }
 })
 
-// Get the server signer address (derived from PRIVATE_KEY)
+
 app.get('/wallet/from-env', (req, res) => {
   try {
     const { web3 } = getWeb3(req.query.chain)
-    const acct = getSigner(web3)   // derives account from PRIVATE_KEY
+    const acct = getSigner(web3)   
     return res.json({ address: acct.address })
   } catch (e) {
     return res.status(400).json({ error: e.message })
@@ -145,7 +145,7 @@ const port = process.env.PORT || 4000
 app.listen(port, () => console.log(`Server listening on http://localhost:${port}`))
 
 
-// Simple allowlist/policy
+
 import policy from './policy.json' assert { type: 'json' }
 function enforcePolicy(toolName, params, web3) {
   if (!policy.allowedTools.includes(toolName)) {
@@ -164,16 +164,14 @@ function enforcePolicy(toolName, params, web3) {
   }
 }
 
-// ---- Agent-style endpoints (inspired by Solana Agent Kit patterns) ----
 
-// NL prompt → tool plan (server-side lightweight intent)
+
 app.post('/agent/plan', async (req, res) => {
   try {
     const t = String(req.body?.prompt || '').toLowerCase()
     const chain = req.body?.chain
 
-    // ultra-simple parser: map keywords → tool + params
-    // (Extend with your LLM or rules as needed)
+   
     let plan = null
     if (t.includes('balance')) {
       const addr = (t.match(/0x[a-f0-9]{20,}/i) || [])[0] || req.body?.address
@@ -198,7 +196,7 @@ app.post('/agent/plan', async (req, res) => {
   }
 })
 
-// Simulate + execute a planned tool
+
 app.post('/agent/execute', async (req, res) => {
   try {
     const { plan, abi, bytecode, address } = req.body
@@ -206,7 +204,7 @@ app.post('/agent/execute', async (req, res) => {
     const { web3 } = getWeb3(plan.params?.chain)
     const signer = getSigner(web3)
 
-    // hydrate params (support convenience for SimpleStorage tag)
+   
     let params = { ...(plan.params || {}) }
     if (plan.tool === 'DEPLOY_CONTRACT' && params.tag === 'SimpleStorage') {
       if (!abi || !bytecode) throw new Error('abi+bytecode required for SimpleStorage')
@@ -222,11 +220,11 @@ app.post('/agent/execute', async (req, res) => {
     const tool = ToolRegistry[plan.tool]
     if (!tool) throw new Error(`Unknown tool ${plan.tool}`)
 
-    // simulate if available
+  
     let simulation = null
     if (tool.simulate) simulation = await tool.simulate({ web3, signer, params })
 
-    // require explicit approve flag
+  
     if (!req.body?.approve) {
       return res.json({ simulation, note: 'Not executed; set approve=true to run.' })
     }
