@@ -1,0 +1,13 @@
+{
+  "allowedTools": [
+    "GET_BALANCE",
+    "SEND_NATIVE",
+    "DEPLOY_CONTRACT",
+    "CONTRACT_CALL"
+  ],
+  "blockedMethods": [
+    "selfdestruct",
+    "delegatecall"
+  ],
+  "maxAmountEther": "0.05"
+}

@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BlockAgent Backend",
+    "version": "1.1.0"
+  },
+  "paths": {
+    "/wallet/new": {
+      "post": {
+        "summary": "Create new wallet",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/balance": {
+      "get": {
+        "summary": "Get native balance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/tx/send": {
+      "post": {
+        "summary": "Send native token",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/contract/deploy": {
+      "post": {
+        "summary": "Deploy contract",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/contract/call": {
+      "post": {
+        "summary": "Call contract method",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/agent/plan": {
+      "post": {
+        "summary": "Prompt \u2192 plan",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/agent/execute": {
+      "post": {
+        "summary": "Execute planned tool",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  }
+}
